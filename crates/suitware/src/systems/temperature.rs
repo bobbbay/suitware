@@ -1,11 +1,7 @@
-use tonic::{transport::Server, Request, Response, Status};
+use tonic::{Request, Response, Status};
 
-use temperature::temperature_service_server::{TemperatureService, TemperatureServiceServer};
-use temperature::{Temperature, TemperatureRequest, TargetTemperatureRequest};
-
-pub mod temperature {
-    tonic::include_proto!("temperature");
-}
+use crate::protocol::temperature::temperature_service_server::TemperatureService;
+use crate::protocol::{temperature::Temperature, temperature::TargetTemperatureRequest, temperature::TemperatureRequest};
 
 #[derive(Default)]
 pub struct TemperatureSensor {}
@@ -37,19 +33,4 @@ impl TemperatureService for TemperatureSensor {
         };
         Ok(Response::new(reply))
     }
-}
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse().unwrap();
-    let greeter = TemperatureSensor::default();
-
-    println!("SemperatureSensor server listening on {}", addr);
-
-    Server::builder()
-        .add_service(TemperatureServiceServer::new(greeter))
-        .serve(addr)
-        .await?;
-
-    Ok(())
 }
