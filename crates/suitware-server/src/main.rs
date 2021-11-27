@@ -19,16 +19,19 @@ async fn main() -> Result<()> {
     let date = env!("VERGEN_BUILD_TIMESTAMP");
     let branch = env!("VERGEN_GIT_BRANCH");
     let commit = env!("VERGEN_GIT_SHA");
-    info!("Running suitware at build {}, branch {}, hash {}", date, branch, commit);
+    let version = env!("VERGEN_GIT_SEMVER");
+    info!("Running suitware at build {}, version {}, branch {}, hash {}.", date, version, branch, commit);
 
     // Set the initial address we want to serve on
     let addr = "[::1]:50051".parse().unwrap();
 
     info!("Starting suitware server on {}", addr);
 
+    let temperature = TemperatureSensor::default();
+
     // Build and start the server
     Server::builder()
-        .add_service(TemperatureServiceServer::new(TemperatureSensor::default()))
+        .add_service(TemperatureServiceServer::new(temperature))
         .serve(addr)
         .await?;
 

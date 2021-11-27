@@ -925,7 +925,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "suitware"
+name = "suitware-server"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
