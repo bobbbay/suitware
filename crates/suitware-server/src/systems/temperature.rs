@@ -1,9 +1,12 @@
 use tonic::{Request, Response, Status};
 
 use crate::protocol::temperature::temperature_service_server::TemperatureService;
-use crate::protocol::{temperature::Temperature, temperature::TargetTemperatureRequest, temperature::TemperatureRequest};
+use crate::protocol::{
+    temperature::TargetTemperatureRequest, temperature::Temperature,
+    temperature::TemperatureRequest,
+};
 
-use tracing::{instrument, info};
+use tracing::{info, instrument};
 
 #[derive(Debug, Default)]
 pub struct TemperatureSensor {
@@ -18,7 +21,10 @@ impl TemperatureService for TemperatureSensor {
         &self,
         request: Request<TemperatureRequest>,
     ) -> Result<Response<Temperature>, Status> {
-        info!("Got a (get temperature) request from {:?}", request.remote_addr());
+        info!(
+            "Got a (get temperature) request from {:?}",
+            request.remote_addr()
+        );
         // TODO: Connect to temperature sensor.
 
         let reply = Temperature {
@@ -33,7 +39,10 @@ impl TemperatureService for TemperatureSensor {
         &self,
         request: Request<TargetTemperatureRequest>,
     ) -> Result<Response<Temperature>, Status> {
-        info!("Got a (set temperature) request from {:?}", request.remote_addr());
+        info!(
+            "Got a (set temperature) request from {:?}",
+            request.remote_addr()
+        );
         // TODO: Connect to temperature sensor.
         // self.target_temperature = request.get_ref().target_temperature;
 

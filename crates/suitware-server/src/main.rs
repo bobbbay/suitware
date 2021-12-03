@@ -1,8 +1,8 @@
 mod protocol;
 mod systems;
 
-use crate::systems::temperature::TemperatureSensor;
 use crate::protocol::temperature::temperature_service_server::TemperatureServiceServer;
+use crate::systems::temperature::TemperatureSensor;
 
 use tonic::transport::Server;
 
@@ -20,7 +20,10 @@ async fn main() -> Result<()> {
     let branch = env!("VERGEN_GIT_BRANCH");
     let commit = env!("VERGEN_GIT_SHA");
     let version = env!("VERGEN_GIT_SEMVER");
-    info!("Running suitware at build {}, version {}, branch {}, hash {}.", date, version, branch, commit);
+    info!(
+        "Running suitware at build {}, version {}, branch {}, hash {}.",
+        date, version, branch, commit
+    );
 
     // Set the initial address we want to serve on
     let addr = "[::1]:50051".parse().unwrap();
