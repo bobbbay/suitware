@@ -1,7 +1,20 @@
-// When compiling natively:
-#[cfg(not(target_arch = "wasm32"))]
-fn main() {
-    let app = suitware_hud::TemplateApp::default();
-    let native_options = eframe::NativeOptions::default();
-    eframe::run_native(Box::new(app), native_options);
+use druid::widget::{Button, Flex, Label};
+use druid::{AppLauncher, LocalizedString, PlatformError, Widget, WidgetExt, WindowDesc};
+
+fn main() -> Result<(), PlatformError> {
+    let main_window = WindowDesc::new(ui_builder);
+    let data = 0_u32;
+    AppLauncher::with_window(main_window)
+        .launch(data)
+}
+
+fn ui_builder() -> impl Widget<u32> {
+    let text =
+        LocalizedString::new("hello-counter").with_arg("count", |data: &u32, _env| (*data).into());
+    let label = Label::new(text).padding(5.0).center();
+    let button = Button::new("increment")
+        .on_click(|_ctx, data, _env| *data += 1)
+        .padding(5.0);
+
+    Flex::column().with_child(label).with_child(button)
 }
