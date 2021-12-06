@@ -6,4 +6,4 @@ in
 // flake
 // builtins
 // nixpkgs
-  // nixpkgs.lib
+// nixpkgs.lib
