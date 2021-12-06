@@ -10,8 +10,7 @@ use tracing::{info, instrument};
 
 #[derive(Debug, Default)]
 pub struct TemperatureSensor {
-    temperature: i32,
-    target_temperature: i32,
+    handle: hal::temperature::TemperatureSensor,
 }
 
 #[tonic::async_trait]
@@ -25,11 +24,12 @@ impl TemperatureService for TemperatureSensor {
             "Got a (get temperature) request from {:?}",
             request.remote_addr()
         );
-        // TODO: Connect to temperature sensor.
+
+        self.handle.get_temperature();
 
         let reply = Temperature {
-            temperature: self.temperature,
-            target_temperature: self.target_temperature,
+            temperature: self.handle.get_temperature(),
+            target_temperature: self.handle.get_target_temperature(),
         };
         Ok(Response::new(reply))
     }
@@ -43,12 +43,12 @@ impl TemperatureService for TemperatureSensor {
             "Got a (set temperature) request from {:?}",
             request.remote_addr()
         );
-        // TODO: Connect to temperature sensor.
-        // self.target_temperature = request.get_ref().target_temperature;
+
+        self.handle.set_target_temperature(request.get_ref().target_temperature);
 
         let reply = Temperature {
-            temperature: self.temperature,
-            target_temperature: self.target_temperature,
+            temperature: self.handle.get_temperature(),
+            target_temperature: self.handle.get_target_temperature(),
         };
         Ok(Response::new(reply))
     }
