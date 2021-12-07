@@ -1911,7 +1911,9 @@ dependencies = [
 name = "suitware-server"
 version = "0.1.0"
 dependencies = [
+ "async-stream",
  "color-eyre",
+ "futures",
  "prost",
  "suitware-hal",
  "tokio",

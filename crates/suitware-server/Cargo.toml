@@ -9,6 +9,8 @@ hal = { path = "../../libs/suitware-hal", package = "suitware-hal" }
 tonic = "0.6"
 prost = "0.9"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+futures = {version = "0.3", default-features = false, features = ["alloc"]}
+async-stream = "0.3"
 
 color-eyre = "0.5"
 tracing = "0.1"

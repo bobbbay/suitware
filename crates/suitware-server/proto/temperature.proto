@@ -7,6 +7,9 @@ service TemperatureService {
 
   // Set a target temperature
   rpc SetTemperature (TargetTemperatureRequest) returns (Temperature) {}
+
+  // Bidirectionally stream the current temperature
+  rpc StreamTemperature(stream TemperatureRequest) returns (stream Temperature) {}
 }
 
 // General temperature status

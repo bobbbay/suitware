@@ -1,3 +1,5 @@
+use futures::{Stream, StreamExt};
+use std::pin::Pin;
 use tonic::{Request, Response, Status};
 
 use crate::protocol::temperature::temperature_service_server::TemperatureService;
@@ -44,12 +46,44 @@ impl TemperatureService for TemperatureSensor {
             request.remote_addr()
         );
 
-        self.handle.set_target_temperature(request.get_ref().target_temperature);
+        self.handle
+            .set_target_temperature(request.get_ref().target_temperature);
 
         let reply = Temperature {
             temperature: self.handle.get_temperature(),
             target_temperature: self.handle.get_target_temperature(),
         };
         Ok(Response::new(reply))
+    }
+
+    type StreamTemperatureStream = Pin<Box<dyn Stream<Item = Result<Temperature, Status>> + Send>>;
+
+    #[instrument]
+    async fn stream_temperature(
+        &self,
+        request: tonic::Request<tonic::Streaming<crate::protocol::temperature::TemperatureRequest>>,
+    ) -> Result<tonic::Response<Self::StreamTemperatureStream>, tonic::Status> {
+        info!("{:?}", request.remote_addr());
+
+        let mut stream = request.into_inner();
+
+        let output = async_stream::try_stream! {
+            while let Some(note) = stream.next().await {
+                let note = note?;
+
+                dbg!(&note);
+
+                let reply = Temperature {
+                    temperature: 1,
+                    target_temperature: 2,
+                };
+
+                yield reply;
+            }
+        };
+
+        Ok(Response::new(
+            Box::pin(output) as Self::StreamTemperatureStream
+        ))
     }
 }
