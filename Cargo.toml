@@ -1,2 +1,5 @@
 [workspace]
 members = [ "crates/*", "libs/*" ]
+
+[profile.release]
+debug = true

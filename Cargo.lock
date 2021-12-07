@@ -1904,7 +1904,11 @@ version = "0.1.0"
 name = "suitware-hud"
 version = "0.1.0"
 dependencies = [
+ "async-stream",
  "druid",
+ "suitware-server",
+ "tokio",
+ "tonic",
 ]
 
 [[package]]

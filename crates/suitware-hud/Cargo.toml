@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-druid = "0.7.0"
+suitware = { path = "../suitware-server", package = "suitware-server" }
 
-[profile.release]
-debug = true
+druid = "0.7.0"
+tonic = "0.6"
+async-stream = "0.3.0"
+tokio = {version = "1.0", features = ["time"]}
 
 [package.metadata.nix]
 build = true

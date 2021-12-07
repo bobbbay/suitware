@@ -3,6 +3,7 @@ mod systems;
 
 use crate::protocol::temperature::temperature_service_server::TemperatureServiceServer;
 use crate::systems::temperature::TemperatureSensor;
+pub use crate::protocol::temperature::temperature_service_client;
 
 use tonic::transport::Server;
 
