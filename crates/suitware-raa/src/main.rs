@@ -2,8 +2,8 @@ mod temperature;
 
 use druid::{
     widget::Flex,
-    AppLauncher, Color, Data, Env, Event, EventCtx, FontDescriptor, FontFamily, Lens,
-    PlatformError, Selector, Widget, WindowDesc,
+    AppLauncher,
+    PlatformError, Widget, WindowDesc,
 };
 
 use temperature::TemperatureState;

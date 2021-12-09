@@ -24,7 +24,7 @@ impl Widget<i32> for MyWindow {
     fn event(&mut self, _ctx: &mut EventCtx, event: &Event, data: &mut i32, _env: &Env) {
         match event {
             Event::Command(cmd) if cmd.is(UPDATE_TEMPERATURE) => {
-                *data = cmd.get_unchecked(UPDATE_TEMPERATURE).clone();
+                *data = *cmd.get_unchecked(UPDATE_TEMPERATURE);
             }
             _ => (),
         }

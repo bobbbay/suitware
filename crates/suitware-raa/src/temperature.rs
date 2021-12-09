@@ -26,7 +26,7 @@ impl Widget<TemperatureState> for Temperature {
     ) {
         match event {
             Event::Command(cmd) if cmd.is(UPDATE_TEMPERATURE) => {
-                data.temperature = cmd.get_unchecked(UPDATE_TEMPERATURE).clone();
+                data.temperature = *cmd.get_unchecked(UPDATE_TEMPERATURE);
             }
             _ => (),
         }
