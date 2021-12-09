@@ -70,6 +70,7 @@ impl TemperatureService for TemperatureSensor {
         let output = async_stream::try_stream! {
             while let Some(note) = stream.next().await {
                 let note = note?;
+                // let temperature = self.handle.get_temperature();
 
                 dbg!(&note);
 
