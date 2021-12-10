@@ -1904,8 +1904,8 @@ version = "0.1.0"
 name = "suitware-hud"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-stream",
+ "color-eyre",
  "druid",
  "suitware-server",
  "tokio",
@@ -1917,6 +1917,7 @@ name = "suitware-raa"
 version = "0.1.0"
 dependencies = [
  "async-stream",
+ "color-eyre",
  "druid",
  "suitware-server",
  "tokio",

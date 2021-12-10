@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     );
 
     // Set the initial address we want to serve on
-    let addr = "[::1]:50051".parse().unwrap();
+    let addr = "[::1]:50051".parse()?;
 
     info!("Starting suitware server on {}", addr);
 

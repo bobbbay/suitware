@@ -1,15 +1,20 @@
 mod temperature;
 
+use color_eyre::Result;
+
 use druid::{
     widget::Flex,
     AppLauncher,
-    PlatformError, Widget, WindowDesc,
+    Widget, WindowDesc,
 };
 
 use temperature::TemperatureState;
 
 #[tokio::main]
-async fn main() -> Result<(), PlatformError> {
+async fn main() -> Result<()> {
+    // Initialize error reporter and tracing
+    color_eyre::install()?;
+
     // Create the window
     let main_window = WindowDesc::new(make_ui);
     let state = TemperatureState { temperature: 0 };
@@ -18,7 +23,9 @@ async fn main() -> Result<(), PlatformError> {
     let sink = launcher.get_external_handle();
     tokio::spawn(temperature::set_temperature(sink));
 
-    launcher.use_simple_logger().launch(state)
+    launcher.use_simple_logger().launch(state)?;
+
+    Ok(())
 }
 
 fn make_ui() -> impl Widget<TemperatureState> {
