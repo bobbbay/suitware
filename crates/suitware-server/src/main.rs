@@ -34,8 +34,7 @@ async fn main() -> Result<()> {
     let temperature = TemperatureSensor::default();
 
     // Build and start the server
-    Server::builder()
-        .add_service(TemperatureServiceServer::new(temperature))
+    Server::builder().add_service(TemperatureServiceServer::new(temperature))
         .serve(addr)
         .await?;
 
