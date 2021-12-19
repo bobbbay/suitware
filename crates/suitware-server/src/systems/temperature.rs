@@ -8,11 +8,13 @@ use crate::protocol::{
     temperature::TemperatureRequest,
 };
 
+use hal::{TemperatureSensorHAL, TemperatureSensorTrait};
+
 use tracing::{info, instrument};
 
 #[derive(Debug, Default)]
 pub struct TemperatureSensor {
-    handle: hal::temperature::TemperatureSensor,
+    handle: TemperatureSensorHAL,
 }
 
 #[tonic::async_trait]
@@ -67,15 +69,17 @@ impl TemperatureService for TemperatureSensor {
 
         let mut stream = request.into_inner();
 
+	// TODO: The temperature shouldn't just be captured here.
+	let temperature = self.handle.get_temperature();
+	dbg!(&temperature);
+
         let output = async_stream::try_stream! {
             while let Some(note) = stream.next().await {
                 let note = note?;
-                // let temperature = self.handle.get_temperature();
-
                 dbg!(&note);
 
                 let reply = Temperature {
-                    temperature: 1,
+                    temperature,
                     target_temperature: 2,
                 };
 

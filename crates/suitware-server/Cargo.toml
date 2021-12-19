@@ -18,6 +18,10 @@ tracing-subscriber = "0.3"
 
 anyhow = "1.0.51"
 
+[features]
+"prod" = [ "hal/prod" ]
+"dev"  = [ "hal/dev" ]
+
 [build-dependencies]
 tonic-build = "0.6"
 vergen = "5"
