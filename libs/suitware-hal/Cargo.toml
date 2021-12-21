@@ -4,10 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-sim = { path = "../../dev/suitware-sim", package = "suitware-sim", optional = true }
-tonic = { version = "0.6", optional = true }
-futures = { version = "0.3.19", optional = true }
-
-[features]
-prod = []
-dev  = [ "sim", "tonic", "futures" ]
+sim = { path = "../../dev/suitware-sim", package = "suitware-sim" }
+tonic = "0.6"
+futures = "0.3.19"
