@@ -12,8 +12,10 @@ use hal::{TemperatureSensorHAL, TemperatureSensorTrait};
 
 use tracing::{info, instrument};
 
+/// An internal temperature sensor.
 #[derive(Debug, Default)]
 pub struct TemperatureSensor {
+    /// A handle to the HAL object.
     handle: TemperatureSensorHAL,
 }
 

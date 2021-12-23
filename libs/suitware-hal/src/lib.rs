@@ -1,3 +1,7 @@
+//! Hardware Abstraction Layer for Suitware systems. On debug mode, connects a
+//! link to the simulator (over gRPC). On release mode, connects directly to
+//! hardware.
+
 #[derive(Debug, Default)]
 pub struct TemperatureSensorHAL;
 pub trait TemperatureSensorTrait {
