@@ -9,12 +9,19 @@ use tonic::transport::Server;
 
 use color_eyre::Result;
 use tracing::info;
+use tracing_subscriber::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initialize error reporter and tracing
     color_eyre::install()?;
-    tracing_subscriber::fmt::init();
+    let tracer = opentelemetry_jaeger::new_pipeline()
+        .with_service_name("report_example")
+        .install_simple()?;
+    let opentelemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+    tracing_subscriber::registry()
+        .with(opentelemetry)
+        .try_init()?;
 
     // Some debug information
     let date = env!("VERGEN_BUILD_TIMESTAMP");

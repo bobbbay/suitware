@@ -71,9 +71,9 @@ impl TemperatureService for TemperatureSensor {
 
         let mut stream = request.into_inner();
 
-	// TODO: The temperature shouldn't just be captured here.
-	let temperature = self.handle.get_temperature();
-	dbg!(&temperature);
+        // TODO: The temperature shouldn't just be captured here.
+        let temperature = self.handle.get_temperature();
+        dbg!(&temperature);
 
         let output = async_stream::try_stream! {
             while let Some(note) = stream.next().await {
