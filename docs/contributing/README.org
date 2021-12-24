@@ -1,0 +1,66 @@
+#+TITLE: Contributing
+
+Firstly, thank you for considering to contribute to Suitware. Your help means a lot to us, which is why we're here to make your journey here easier and more interesting. Before we begin, here are a few resources you may find useful over your time contributing to Suitware:
+
+ * TODO: insert NA invite link
+ * If you're looking for an easy way to snipe issues, use the [[https://github.com/semc-labs/suitware/labels/good%20first%20issue][good first issue]] tag.
+
+Moving on, we'll start off by covering some general tools/crates that we use for all or most projects. Then, we'll move on to the project architecture.
+
+** Tools
+
+*** Cargo workspaces
+
+If you're familiar with Cargo workspaces, you can skip this section.
+
+Cargo is Rust's package manager. By default, it manages projects by creating a =/src= directory, which contains source code, and a =/target= directory, which contains built binaries and libraries. It also has a =Cargo.lock= lockfile for dependencies.
+
+This setup is great for a one-use project - but for a project with multiple moving parts, it's not practical. In general, Cargo workspaces allow the sharing of =/target= directories, =Cargo.lock=s, and most importantly, help in enabling each project to depend on each other, internally.
+
+To read more about Cargo workspaces, [[https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html][the Rust documentation]] is very thorough.
+
+For Suitware, all you need to know is that projects that have the potential of being published to crates.io are found in the =/crates= directory. Projects that are internal libraries and would suit no purpose to the outside community are found in the =/libs= directory. Finally, projects that are used only for development purposes are found in the =/dev= directory. We will enter into more detail about exactly what each project does and why, but for now this information is sufficient.
+
+*** Nix
+
+[[https://nixos.org/][Nix]] is a declarative, reproducible, and functional build and deployment system targeted for all languages. It uses a "Flake" to manage dependencies, targets, and more.
+
+If you're reading this and aren't aware of what Nix is, don't worry. Nix is not mandatory to run Suitware.
+
+If you're reading this and are aware of what Nix is/already have it installed/want to try it out, just know that Suitware supports Nix Flakes via =nix-cargo-integration=. There is also a fully-featured devshell through =nix develop=. Happy Nix-ing!
+
+*** Crates
+
+The following crates are used commonly throughout most, if not all, projects in Suitware. It is best to get to know them, even if they aren't related to your current task, because code regarding them are dispersed without warning throughout all of Suitware.
+
+*** =color-eyre=
+
+[[https://github.com/yaahc/color-eyre][=color-eyre=]] is a colorized version of [[https://docs.rs/eyre/latest/eyre/][=eyre=]], the error reporting crate. There is not much need to go into detail about this crate - just know that most binary applications in Suitware initialize this, in order to create well-informed error messages upon failure. If you find a =Result= that only takes one generic type, it's probably an =eyre= =Result= - don't worry, that's on purpose.
+
+** Architecture
+
+[[../ARCHITECTURE.png]]
+
+*** =suitware-server=
+
+=suitware-server= is the core of Suitware. It connects the hardware abstraction layer (=suitware-hal=) to a publicly-served gRPC server, that clients can connect and read information from. Furthermore, it provides its logs through Opentelemetry, allowing us to read /a lot/ into what goes on behind the good via logs.
+
+For more reading on Opentelemetry, [[https://opentelemetry.io/][their homepage]] is a great place to start. We use [[https://github.com/tokio-rs/tracing][tracing]] to log all information. Their connection with Opentelemetry is documented [[https://docs.rs/tracing-opentelemetry/0.16.0/tracing_opentelemetry/index.html][here]].
+
+Another point of interest is [[https://github.com/hyperium/tonic][tonic]], the native gRPC library with asyncronous support. We define protocols as Protocol Buffers (found in =suitware-server='s =/proto= directory) according to Google's specification, and implement each of them and their functionality in the =system= modules (found under =/src/systems=). The protobuf is the "template" of each protocol, and the system is the real-life implementation.
+
+If you're interested in contributing to =suitware-server=, [[https://github.com/hyperium/tonic][tonic]] is a great library to read into, because it powers the core of what server really is. A very neat feature of Tonic is that it is a /client/ as well - given protocol buffers, it can create requests to gRPC servers! This is great, because it means that if we publicize our protocols as a library, anyone else can depend on it and use Tonic's generated functions to create requests with ease. This is why =suitware-server= is special, and doubles as both a binary crate (the server) and a library (the client constructors). We'll see how this is used later on in our client implementations, but it's important to note that anybody can, from scratch, create a Suitware client quite easily thanks to this feature.
+
+*** =suitware-raa= and =suitware-hud=
+
+These two very-similar binary crates depend on the =suitware-server= over gRPC (using the previously mentioned constructors) and display its information in a friendly form. "HUD" stands for "Heads-Up Display", while "RAA" stands for "Remote-Access Application". The former is responsible for showing the suit-wearer a live stream of all events, on the helmet, and the latter has the goal of being accessed remotely, from mission control, for example.
+
+These applications are written using the [[https://github.com/linebender/druid][Druid]] framework. Their [[https://github.com/linebender/druid/blob/master/docs/src/get_started.md][documentation]] and [[https://github.com/linebender/druid/tree/master/druid/examples][examples]] are thorough, so we'll leave it at that!
+
+*** TODO: =suitware-hal=
+
+*** TODO: =suitware-sim=
+
+*** TODO: =suitware-synthesis=
+
+*** TODO: More to come!
