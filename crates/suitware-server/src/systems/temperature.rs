@@ -1,6 +1,6 @@
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
-use tonic::{Request, Response, Status};
+use tonic::{Request, Response, Status, Streaming};
 
 use crate::protocol::temperature::temperature_service_server::TemperatureService;
 use crate::protocol::{
@@ -10,7 +10,7 @@ use crate::protocol::{
 
 use hal::{TemperatureSensorHAL, TemperatureSensorTrait};
 
-use tracing::{info, instrument};
+use tracing::{debug, instrument};
 
 /// An internal temperature sensor.
 #[derive(Debug, Default)]
@@ -19,19 +19,18 @@ pub struct TemperatureSensor {
     handle: TemperatureSensorHAL,
 }
 
+/// A resulting temperature status
+type TemperatureResult = Result<Response<Temperature>, Status>;
+/// Just a stream of temperatures
+type TemperatureStream = Pin<Box<dyn Stream<Item = Result<Temperature, Status>> + Send>>;
+/// A resulting streamed temperatures status
+type TemperatureStreamResult = Result<Response<TemperatureStream>, Status>;
+
 #[tonic::async_trait]
 impl TemperatureService for TemperatureSensor {
     #[instrument]
-    async fn get_temperature(
-        &self,
-        request: Request<TemperatureRequest>,
-    ) -> Result<Response<Temperature>, Status> {
-        info!(
-            "Got a (get temperature) request from {:?}",
-            request.remote_addr()
-        );
-
-        self.handle.get_temperature();
+    async fn get_temperature(&self, request: Request<TemperatureRequest>) -> TemperatureResult {
+        debug!("Request from {:?}", request.remote_addr());
 
         let reply = Temperature {
             temperature: self.handle.get_temperature(),
@@ -44,11 +43,8 @@ impl TemperatureService for TemperatureSensor {
     async fn set_temperature(
         &self,
         request: Request<TargetTemperatureRequest>,
-    ) -> Result<Response<Temperature>, Status> {
-        info!(
-            "Got a (set temperature) request from {:?}",
-            request.remote_addr()
-        );
+    ) -> TemperatureResult {
+        debug!("Request from {:?}", request.remote_addr());
 
         self.handle
             .set_target_temperature(request.get_ref().target_temperature);
@@ -60,14 +56,14 @@ impl TemperatureService for TemperatureSensor {
         Ok(Response::new(reply))
     }
 
-    type StreamTemperatureStream = Pin<Box<dyn Stream<Item = Result<Temperature, Status>> + Send>>;
+    type StreamTemperatureStream = TemperatureStream;
 
     #[instrument]
     async fn stream_temperature(
         &self,
-        request: tonic::Request<tonic::Streaming<crate::protocol::temperature::TemperatureRequest>>,
-    ) -> Result<tonic::Response<Self::StreamTemperatureStream>, tonic::Status> {
-        info!("{:?}", request.remote_addr());
+        request: Request<Streaming<TemperatureRequest>>,
+    ) -> TemperatureStreamResult {
+        debug!("Request from {:?}", request.remote_addr());
 
         let mut stream = request.into_inner();
 
