@@ -1,6 +1,6 @@
 use druid::{
-    Data, Env, Event, EventCtx, ExtEventSink, FontDescriptor, Lens, Selector, Target, Widget,
-    FontFamily, Color,
+    Color, Data, Env, Event, EventCtx, ExtEventSink, FontDescriptor, FontFamily, Lens, Selector,
+    Target, Widget,
 };
 use std::time::Duration;
 use suitware::protocol::temperature::temperature_service_client::TemperatureServiceClient;

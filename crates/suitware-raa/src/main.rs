@@ -2,11 +2,7 @@ mod temperature;
 
 use color_eyre::Result;
 
-use druid::{
-    widget::Flex,
-    AppLauncher,
-    Widget, WindowDesc,
-};
+use druid::{widget::Flex, AppLauncher, Widget, WindowDesc};
 
 use temperature::TemperatureState;
 

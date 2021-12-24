@@ -11,8 +11,7 @@ pub(super) fn write<F: Frame>(audio: Audio<F>, filename: &str) -> io::Result<()>
 where
     Ch16: From<F::Chan>,
 {
-    let audio =
-        Audio::<Stereo16>::with_stream(audio.sample_rate().floor(), &audio);
+    let audio = Audio::<Stereo16>::with_stream(audio.sample_rate().floor(), &audio);
     let mut buf = vec![];
     write_header(&mut buf, &audio);
     write_fmt_header(&mut buf, &audio);

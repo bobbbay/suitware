@@ -64,7 +64,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         App::build()
             .add_plugins(DefaultPlugins)
             .add_plugin(InspectorPlugin::<Data>::new())
-            .add_system(update.system()).run();
+            .add_system(update.system())
+            .run();
     });
 
     let (server_result, bevy_result) = futures::future::join(server, bevy).await;
