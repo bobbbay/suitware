@@ -15,7 +15,7 @@ If you're familiar with Cargo workspaces, you can skip this section.
 
 Cargo is Rust's package manager. By default, it manages projects by creating a =/src= directory, which contains source code, and a =/target= directory, which contains built binaries and libraries. It also has a =Cargo.lock= lockfile for dependencies.
 
-This setup is great for a one-use project - but for a project with multiple moving parts, it's not practical. In general, Cargo workspaces allow the sharing of =/target= directories, =Cargo.lock=s, and most importantly, help in enabling each project to depend on each other, internally.
+This setup is great for a one-use project - but for a project with multiple moving parts, it's not practical. In general, Cargo workspaces allow the sharing of a =/target= directory, a =Cargo.lock=, and most importantly, help in enabling each project to depend on each other, internally.
 
 To read more about Cargo workspaces, [[https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html][the Rust documentation]] is very thorough.
 
@@ -35,7 +35,7 @@ The following crates are used commonly throughout most, if not all, projects in 
 
 *** =color-eyre=
 
-[[https://github.com/yaahc/color-eyre][=color-eyre=]] is a colorized version of [[https://docs.rs/eyre/latest/eyre/][=eyre=]], the error reporting crate. There is not much need to go into detail about this crate - just know that most binary applications in Suitware initialize this, in order to create well-informed error messages upon failure. If you find a =Result= that only takes one generic type, it's probably an =eyre= =Result= - don't worry, that's on purpose.
+[[https://github.com/yaahc/color-eyre][Color-eyre]] is a colorized version of [[https://docs.rs/eyre/latest/eyre/][Eyre]], the error reporting crate. There is not much need to go into detail about this crate - just know that most binary applications in Suitware initialize this, in order to create well-informed error messages upon failure. If you find a =Result= that only takes one generic type, it's probably an =eyre= =Result= - don't worry, that's on purpose.
 
 ** Architecture
 
@@ -57,10 +57,18 @@ These two very-similar binary crates depend on the =suitware-server= over gRPC (
 
 These applications are written using the [[https://github.com/linebender/druid][Druid]] framework. Their [[https://github.com/linebender/druid/blob/master/docs/src/get_started.md][documentation]] and [[https://github.com/linebender/druid/tree/master/druid/examples][examples]] are thorough, so we'll leave it at that!
 
-*** TODO: =suitware-hal=
+*** =suitware-hal=
 
-*** TODO: =suitware-sim=
+The =suitware-hal= is one of the most interesting parts of Suitware, especially when coupled with =suitware-sim=. It is the /Hardware Abstraction Layer/, that basically abstracts hardware into program-readable functions and traits. Depending on the type of build, it will either use drivers for each piece of hardware it supports, or it will use a connection to =suitware-sim= to simulate it. The former is turned on in =release= builds (=cargo build --release=), and the latter in development builds (usually =cargo build=). It's important to note that if you're developing drivers, you should always compile by =release=.
 
-*** TODO: =suitware-synthesis=
+That's all that's important for =suitware-hal=! The relationship between =suitware-hal= and =suitware-sim= is similar to the relationship between =suitware-{hud,raa}= and =suitware-server= - the clients (=hal=, =hud=, and =raa=) depend on the servers (=sim= and =server=) via Cargo, in order to make use of the typed gRPC request constructors.
+
+*** =suitware-sim=
+
+=suitware-sim= doubles as a gRPC server and a [[https://bevyengine.org/][Bevy]] UI for simulation and visualization simultaneously. This is nice, because it means we can use physics libraries such as [[https://rapier.rs/][rapier]] in the comfort of Bevy, synced with the gRPC server.
+
+*** =suitware-synthesis=
+
+=suitware-synthesis= is a library that, given a state of an object, can synthesize audio about it. This is useful for suit-wearers, because it allows them to use a second sense in the field - audio.
 
 *** TODO: More to come!
