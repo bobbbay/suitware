@@ -7,3 +7,4 @@ edition = "2021"
 sim = { path = "../../dev/suitware-sim", package = "suitware-sim" }
 tonic = "0.6"
 futures = "0.3.19"
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }

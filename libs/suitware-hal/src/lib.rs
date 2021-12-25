@@ -55,3 +55,15 @@ impl TemperatureSensorTrait for TemperatureSensorHAL {
 
     fn set_target_temperature(&self, _target: i32) {}
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get_temperature() {
+	let temperature = TemperatureSensorHAL {};
+	let t = temperature.get_temperature();
+	dbg!(t);
+    }
+}
