@@ -1,27 +1,28 @@
-mod protocol;
-mod systems;
-
-pub use crate::protocol::temperature::temperature_service_client;
-use crate::protocol::temperature::temperature_service_server::TemperatureServiceServer;
-use crate::systems::temperature::TemperatureSensor;
-
-use tonic::transport::Server;
-
 use color_eyre::Result;
-use tracing::{debug, info, instrument};
+use tonic::transport::Server;
+use tracing::{info, instrument};
+use tracing_error::ErrorLayer;
 use tracing_subscriber::prelude::*;
 
-/// Initialize error reporter and tracing via opentelemetry.
+pub mod protocol;
+pub mod systems;
+
+use protocol::temperature::temperature_service_server::TemperatureServiceServer;
+use systems::temperature::TemperatureSensor;
+
+/// Initialize error reporter and tracing via Opentelemetry.
 #[instrument]
-fn setup() -> Result<()> {
+fn install_tracing() -> Result<()> {
     color_eyre::install()?;
 
     let tracer = opentelemetry_jaeger::new_pipeline()
         .with_service_name("suitware-server")
         .install_simple()?;
     let opentelemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+
     tracing_subscriber::registry()
         .with(opentelemetry)
+        .with(ErrorLayer::default())
         .try_init()?;
 
     Ok(())
@@ -35,7 +36,7 @@ fn debug_info() -> Result<()> {
     let commit = env!("VERGEN_GIT_SHA");
     let version = env!("VERGEN_GIT_SEMVER");
 
-    debug!(
+    info!(
         "Running suitware at build {}, version {}, branch {}, hash {}.",
         date, version, branch, commit
     );
@@ -43,17 +44,19 @@ fn debug_info() -> Result<()> {
     Ok(())
 }
 
+#[instrument]
 #[tokio::main]
 async fn main() -> Result<()> {
-    setup()?;
+    install_tracing()?;
+    debug_info()?;
 
     let addr = "[::1]:50051".parse()?;
     info!("Starting suitware server on {}", addr);
 
-    let temperature = TemperatureSensor::default();
+    let temperature_sensor = TemperatureSensor::default();
 
     Server::builder()
-        .add_service(TemperatureServiceServer::new(temperature))
+        .add_service(TemperatureServiceServer::new(temperature_sensor))
         .serve(addr)
         .await?;
 

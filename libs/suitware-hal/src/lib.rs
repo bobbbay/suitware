@@ -2,6 +2,8 @@
 //! link to the simulator (over gRPC). On release mode, connects directly to
 //! hardware.
 
+use tracing::instrument;
+
 #[derive(Debug, Default)]
 pub struct TemperatureSensorHAL;
 pub trait TemperatureSensorTrait {
@@ -13,6 +15,7 @@ pub trait TemperatureSensorTrait {
 }
 
 impl TemperatureSensorTrait for TemperatureSensorHAL {
+    #[instrument]
     fn get_temperature(&self) -> i32 {
         if cfg!(not(debug_assertions)) {
             // Running in release mode. Connect to the actual sensor.
@@ -33,6 +36,7 @@ impl TemperatureSensorTrait for TemperatureSensorHAL {
         }
     }
 
+    #[instrument]
     fn get_target_temperature(&self) -> i32 {
         if cfg!(not(debug_assertions)) {
             // Running in release mode. Connect to the actual sensor.
@@ -53,6 +57,7 @@ impl TemperatureSensorTrait for TemperatureSensorHAL {
         }
     }
 
+    #[instrument]
     fn set_target_temperature(&self, _target: i32) {}
 }
 

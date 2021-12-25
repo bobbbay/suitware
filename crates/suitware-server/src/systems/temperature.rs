@@ -1,16 +1,15 @@
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use tonic::{Request, Response, Status, Streaming};
+use tracing::{info, instrument};
+
+use hal::{TemperatureSensorHAL, TemperatureSensorTrait};
 
 use crate::protocol::temperature::temperature_service_server::TemperatureService;
 use crate::protocol::{
     temperature::TargetTemperatureRequest, temperature::Temperature,
     temperature::TemperatureRequest,
 };
-
-use hal::{TemperatureSensorHAL, TemperatureSensorTrait};
-
-use tracing::{debug, instrument};
 
 /// An internal temperature sensor.
 #[derive(Debug, Default)]
@@ -29,13 +28,14 @@ type TemperatureStreamResult = Result<Response<TemperatureStream>, Status>;
 #[tonic::async_trait]
 impl TemperatureService for TemperatureSensor {
     #[instrument]
-    async fn get_temperature(&self, request: Request<TemperatureRequest>) -> TemperatureResult {
-        debug!("Request from {:?}", request.remote_addr());
-
+    async fn get_temperature(&self, _: Request<TemperatureRequest>) -> TemperatureResult {
         let reply = Temperature {
             temperature: self.handle.get_temperature(),
             target_temperature: self.handle.get_target_temperature(),
         };
+
+        info!("{:?}", &reply);
+
         Ok(Response::new(reply))
     }
 
@@ -44,8 +44,6 @@ impl TemperatureService for TemperatureSensor {
         &self,
         request: Request<TargetTemperatureRequest>,
     ) -> TemperatureResult {
-        debug!("Request from {:?}", request.remote_addr());
-
         self.handle
             .set_target_temperature(request.get_ref().target_temperature);
 
@@ -53,6 +51,9 @@ impl TemperatureService for TemperatureSensor {
             temperature: self.handle.get_temperature(),
             target_temperature: self.handle.get_target_temperature(),
         };
+
+        info!("{:?}", &reply);
+
         Ok(Response::new(reply))
     }
 
@@ -63,18 +64,14 @@ impl TemperatureService for TemperatureSensor {
         &self,
         request: Request<Streaming<TemperatureRequest>>,
     ) -> TemperatureStreamResult {
-        debug!("Request from {:?}", request.remote_addr());
-
         let mut stream = request.into_inner();
 
         // TODO: The temperature shouldn't just be captured here.
         let temperature = self.handle.get_temperature();
-        dbg!(&temperature);
 
         let output = async_stream::try_stream! {
             while let Some(note) = stream.next().await {
-                let note = note?;
-                dbg!(&note);
+                let _note = note?;
 
                 let reply = Temperature {
                     temperature,
