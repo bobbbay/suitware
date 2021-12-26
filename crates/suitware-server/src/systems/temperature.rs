@@ -1,3 +1,4 @@
+use async_stream::try_stream;
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use tonic::{Request, Response, Status, Streaming};
@@ -66,16 +67,13 @@ impl TemperatureService for TemperatureSensor {
     ) -> TemperatureStreamResult {
         let mut stream = request.into_inner();
 
-        // TODO: The temperature shouldn't just be captured here.
-        let temperature = self.handle.get_temperature();
-
-        let output = async_stream::try_stream! {
-            while let Some(note) = stream.next().await {
-                let _note = note?;
+        let output = try_stream! {
+            while let Some(_) = stream.next().await {
+		let sensor = TemperatureSensorHAL::default();
 
                 let reply = Temperature {
-                    temperature,
-                    target_temperature: 2,
+                    temperature: sensor.get_temperature(),
+                    target_temperature: sensor.get_target_temperature(),
                 };
 
                 yield reply;

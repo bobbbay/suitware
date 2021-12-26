@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::tasks::AsyncComputeTaskPool;
 use bevy::DefaultPlugins;
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 use color_eyre::Result;

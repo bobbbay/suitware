@@ -1,5 +1,3 @@
-pub(crate) mod wav;
-
 pub trait Synthesis {
     type Params;
     const S_RATE: u32;
@@ -83,14 +81,12 @@ mod tests {
         use super::Synthesis;
 
         let vehicle = Vehicle {};
-        let audio = vehicle.synthesize(Params {
+        let _audio = vehicle.synthesize(Params {
             distance: 0,
             velocity: 10,
             state: EngineState::Off,
             rate_of_change: 5,
         });
-
-        // crate::wav::write(audio, "synth.wav")?;
 
         Ok(())
     }
