@@ -44,6 +44,13 @@ fn debug_info() -> Result<()> {
     Ok(())
 }
 
+struct Suitware {
+    systems: [&dyn System],
+    tasks: Option<TaskPool>,
+}
+
+trait System {}
+
 #[instrument]
 #[tokio::main]
 async fn main() -> Result<()> {

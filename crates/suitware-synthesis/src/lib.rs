@@ -5,6 +5,8 @@ pub trait Synthesis {
 }
 
 pub mod vehicle {
+    use fon::{Audio, mono::Mono64};
+
     use super::Synthesis;
 
     pub struct Vehicle {}
@@ -29,7 +31,7 @@ pub mod vehicle {
         type Params = Params;
         const S_RATE: u32 = 48_000;
 
-        fn synthesize(&self, params: Self::Params) -> fon::Audio<fon::mono::Mono64> {
+        fn synthesize(&self, params: Self::Params) -> Audio<Mono64> {
             use fon::{mono::Mono64, Audio, Sink};
             use twang::{Fc, Mix, Signal, Synth};
 
@@ -61,9 +63,6 @@ pub mod vehicle {
             // Generate audio samples.
             audio.sink(..).stream(&mut synth);
 
-            // Write synthesized audio to WAV file.
-            // TODO: crate::wav::write(audio, "synth.wav").expect("Failed to write WAV file");
-
             audio
         }
     }
@@ -71,11 +70,18 @@ pub mod vehicle {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn synthesize_vehicle() -> Result<(), color_eyre::Report> {
+    use color_eyre::Result;
+
+    /// Setup test environments
+    pub(crate) fn setup_tests() -> Result<()> {
         // Initialize error reporter and tracing
         color_eyre::install()?;
         tracing_subscriber::fmt::init();
+    }
+    
+    #[test]
+    fn synthesize_vehicle() -> Result<()> {
+	se    setup_tests()?;
 
         use super::vehicle::*;
         use super::Synthesis;

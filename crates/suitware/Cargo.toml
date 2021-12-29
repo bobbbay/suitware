@@ -1,0 +1,24 @@
+[package]
+name = "suitware"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.0", features = [ "macros", "rt-multi-thread", "sync", "net" ] }
+tokio-stream = "0.1"
+async-stream = "0.3"
+
+rumqttd = "0.7"
+rumqttc = "0.6"
+mqttbytes = "0.4"
+confy = "0.4"
+
+async-trait = "0.1"
+
+thiserror = "1.0"
+
+tracing = "0.1"
+
+[dev-dependencies]
+color-eyre = "0.5"
+tracing-subscriber = { version = "0.3.4", features = [ "env-filter" ] }
