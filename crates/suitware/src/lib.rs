@@ -2,7 +2,6 @@ use std::{collections::HashMap, thread, time::Duration};
 
 use error::SuitwareError;
 use librumqttd::{Broker, Config};
-use rumqttc::{AsyncClient, Event::{Incoming, Outgoing}, MqttOptions, Packet, QoS::AtMostOnce};
 
 pub mod error {
     use thiserror::Error;
@@ -12,6 +11,7 @@ pub mod error {
 }
 
 pub struct Suitware<'a> {
+    systems: Vec<&'a dyn System>,
     tasks: TaskPool<'a>,
 }
 
@@ -19,6 +19,7 @@ impl<'a> Suitware<'a> {
     /// Create a new app.
     pub fn new() -> Self {
         Suitware {
+	    systems: vec![],
             tasks: TaskPool {
                 tasks: HashMap::new(),
             },
@@ -32,7 +33,9 @@ impl<'a> Suitware<'a> {
     }
 
     /// Add a system to the actor
-    pub fn add_system(self) -> Self {
+    pub fn add_system(mut self, system: &'a dyn System) -> Self {
+	self.systems.push(system);
+	
         self
     }
 
@@ -43,6 +46,11 @@ impl<'a> Suitware<'a> {
 
     pub async fn start(self) -> Result<(), SuitwareError> {
         self.start_broker().await?;
+
+	for system in self.systems {
+	    system.run().await.unwrap();
+	}
+
         Ok(())
     }
 
@@ -55,44 +63,13 @@ impl<'a> Suitware<'a> {
             broker.start().unwrap();
         });
 
-        let mqttoptions = MqttOptions::new("some-identifier", "localhost", 5001);
-
-        let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
-
-        client
-            .subscribe("temperature_sensor/get", AtMostOnce)
-            .await
-            .unwrap();
-
-        tokio::spawn(async move {
-            for _ in 1..=100 {
-                client
-                    .publish("temperature_sensor/get", AtMostOnce, false, "200")
-                    .await
-                    .unwrap();
-
-                tokio::time::sleep(Duration::from_secs(1)).await;
-            }
-        });
-
-        loop {
-            let event = eventloop.poll().await.unwrap();
-            match event {
-                Incoming(i) => match i {
-                    Packet::Publish(p) => println!("{:?}", p.payload),
-                    _ => println!("{:?}", i),
-                },
-                Outgoing(o) => println!("{:?}", o),
-            }
-        }
-
         Ok(())
     }
 }
 
 #[async_trait::async_trait]
-trait System {
-    async fn run();
+pub trait System {
+    async fn run(&self) -> Result<(), &dyn std::error::Error>;
 }
 
 struct TaskPool<'a> {

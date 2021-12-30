@@ -1,33 +1,51 @@
-mod temperature;
-
 use color_eyre::Result;
+use rumqttc::{AsyncClient, MqttOptions, Packet, QoS};
+use tracing::instrument;
+use tracing_subscriber::util::SubscriberInitExt;
 
-use druid::{widget::Flex, AppLauncher, Widget, WindowDesc};
+sixtyfps::include_modules!();
 
-use temperature::TemperatureState;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Initialize error reporter and tracing
+/// Initialize error reporter and tracing
+#[instrument]
+fn install_tracing() -> Result<()> {
     color_eyre::install()?;
 
-    // Create the window
-    let main_window = WindowDesc::new(make_ui);
-    let state = TemperatureState { temperature: 0 };
-    let launcher = AppLauncher::with_window(main_window);
-
-    let sink = launcher.get_external_handle();
-    tokio::spawn(temperature::set_temperature(sink));
-
-    launcher.use_simple_logger().launch(state)?;
+    tracing_subscriber::registry().try_init()?;
 
     Ok(())
 }
 
-fn make_ui() -> impl Widget<TemperatureState> {
-    let mut app = Flex::row();
+#[tokio::main]
+async fn main() -> Result<()> {
+    install_tracing()?;
 
-    app.add_child(temperature::Temperature);
+    let handle = Main::new();
+    let handle_weak = handle.as_weak();
 
-    app
+    let _thread = tokio::spawn(async move {
+        let mqttoptions = MqttOptions::new("some-system-id", "localhost", 5001);
+
+        let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+
+        client
+            .subscribe("temperature_sensor/get", QoS::AtMostOnce)
+            .await
+            .unwrap();
+
+        loop {
+            let event = eventloop.poll().await.unwrap();
+            if let rumqttc::Event::Incoming(Packet::Publish(p)) = event {
+                let temperature = bincode::deserialize(&p.payload).unwrap();
+
+                // Forward the temperature to the main thread
+                handle_weak.clone().upgrade_in_event_loop(move |handle| {
+                    handle.set_temperature(temperature);
+                });
+            }
+        }
+    });
+
+    handle.run();
+
+    Ok(())
 }

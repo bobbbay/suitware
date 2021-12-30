@@ -1,0 +1,8 @@
+Main := Window {
+    property<int> temperature: 1000;
+
+    Text {
+        text: "Temperature: \{temperature}";
+        color: green;
+    }
+}
