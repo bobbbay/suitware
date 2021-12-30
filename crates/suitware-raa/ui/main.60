@@ -1,8 +1,86 @@
-Main := Window {
-    property<int> temperature: 1000;
+import { ScrollView } from "sixtyfps_widgets.60";
 
-    Text {
-        text: "Temperature: \{temperature}";
-        color: green;
+Main := Window {
+    // Start off with these widths and heights. The app can be resized, but
+    // these are the defaults.
+    preferred-width: 1000px;
+    preferred-height: 700px;
+
+    // Callbacks
+    callback render_temperature_sensor([float], float) -> image;
+
+    // Properties
+    property<[float]> previous_temperatures: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
+    property<int> temperature;
+    property<[string]> logs;
+
+    GridLayout {
+        spacing: 20px;
+	Row {
+            Image {
+	    	source: root.render_temperature_sensor(root.previous_temperatures, root.temperature);
+            }
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+	    Rectangle { background: blue; rowspan: 2; colspan: 2; }
+	}
+	Row {
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+	}
+	Row {
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+		colspan: 2;
+            }
+	}
+	Row {
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+	    ScrollView {
+	        colspan: 2;
+	        rowspan: 2;
+
+		VerticalLayout {
+		    alignment: LayoutAlignment.start;
+		    for t in root.logs: Text {
+		        text: t;
+		    }
+		}
+	    }
+        }
+	Row {
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+            Text {
+                text: "Temperature: \{temperature}";
+                color: green;
+            }
+	}
     }
 }

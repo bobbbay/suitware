@@ -32,7 +32,7 @@ pub mod vehicle {
         const S_RATE: u32 = 48_000;
 
         fn synthesize(&self, params: Self::Params) -> Audio<Mono64> {
-            use fon::{mono::Mono64, Audio, Sink};
+            use fon::Sink;
             use twang::{Fc, Mix, Signal, Synth};
 
             fn sound(params: &mut Params, fc: Fc) -> Signal {
@@ -71,20 +71,20 @@ pub mod vehicle {
 #[cfg(test)]
 mod tests {
     use color_eyre::Result;
+    use super::*;
+    use super::vehicle::*;
 
-    /// Setup test environments
+    /// Setup test environment
     pub(crate) fn setup_tests() -> Result<()> {
-        // Initialize error reporter and tracing
         color_eyre::install()?;
         tracing_subscriber::fmt::init();
+
+	Ok(())
     }
     
     #[test]
     fn synthesize_vehicle() -> Result<()> {
-	se    setup_tests()?;
-
-        use super::vehicle::*;
-        use super::Synthesis;
+	setup_tests()?;
 
         let vehicle = Vehicle {};
         let _audio = vehicle.synthesize(Params {

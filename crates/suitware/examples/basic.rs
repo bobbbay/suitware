@@ -1,5 +1,5 @@
 use color_eyre::Result;
-use rumqttc::{AsyncClient, MqttOptions, Packet, QoS};
+use rumqttc::{AsyncClient, MqttOptions, QoS};
 use tokio::time::Duration;
 
 use suitware::{Suitware, System, Task};
@@ -14,13 +14,8 @@ impl System for TemperatureSensor {
 
         let (client, mut eventloop) = AsyncClient::new(mqttoptions, 100);
 
-        client
-            .subscribe("temperature_sensor/get", QoS::AtMostOnce)
-            .await
-            .unwrap();
-
         tokio::spawn(async move {
-            for i in 1..=100 {
+            for i in 1..=i32::MAX {
                 let serialized = bincode::serialize(&i).unwrap();
 
                 client
@@ -33,15 +28,8 @@ impl System for TemperatureSensor {
         });
 
         loop {
-            let event = eventloop.poll().await.unwrap();
-            match event {
-                _ => {
-                    dbg!(event);
-                }
-            }
+            eventloop.poll().await.unwrap();
         }
-
-        Ok(())
     }
 }
 

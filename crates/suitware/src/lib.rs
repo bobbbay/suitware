@@ -2,7 +2,6 @@ use std::{collections::HashMap, thread, time::Duration};
 
 use error::SuitwareError;
 use librumqttd::{Broker, Config};
-use rumqttc::{AsyncClient, MqttOptions, QoS};
 
 pub mod error {
     use thiserror::Error;
