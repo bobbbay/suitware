@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     let _thread = tokio::spawn(async move {
         let mqttoptions = MqttOptions::new("some-system-id", "localhost", 5001);
 
-        let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+        let (client, mut eventloop) = AsyncClient::new(mqttoptions, 100);
 
         client
             .subscribe("temperature_sensor/get", QoS::AtMostOnce)

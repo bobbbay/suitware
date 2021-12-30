@@ -2,6 +2,7 @@ use std::{collections::HashMap, thread, time::Duration};
 
 use error::SuitwareError;
 use librumqttd::{Broker, Config};
+use rumqttc::{AsyncClient, MqttOptions, QoS};
 
 pub mod error {
     use thiserror::Error;
@@ -19,7 +20,7 @@ impl<'a> Suitware<'a> {
     /// Create a new app.
     pub fn new() -> Self {
         Suitware {
-	    systems: vec![],
+            systems: vec![],
             tasks: TaskPool {
                 tasks: HashMap::new(),
             },
@@ -34,8 +35,8 @@ impl<'a> Suitware<'a> {
 
     /// Add a system to the actor
     pub fn add_system(mut self, system: &'a dyn System) -> Self {
-	self.systems.push(system);
-	
+        self.systems.push(system);
+
         self
     }
 
@@ -45,23 +46,16 @@ impl<'a> Suitware<'a> {
     }
 
     pub async fn start(self) -> Result<(), SuitwareError> {
-        self.start_broker().await?;
-
-	for system in self.systems {
-	    system.run().await.unwrap();
-	}
-
-        Ok(())
-    }
-
-    async fn start_broker(&self) -> Result<(), SuitwareError> {
         let config: Config = confy::load_path("protocol/mqttd.conf").unwrap();
-        println!("{:#?}", &config);
         let mut broker = Broker::new(config);
 
         thread::spawn(move || {
             broker.start().unwrap();
         });
+
+        for system in self.systems {
+            system.run().await.unwrap();
+        }
 
         Ok(())
     }
