@@ -1,7 +1,6 @@
-use std::{collections::HashMap, thread, time::Duration};
+use std::{collections::HashMap, time::Duration};
 
 use error::SuitwareError;
-use librumqttd::{Broker, Config};
 
 pub mod error {
     use thiserror::Error;
@@ -11,29 +10,32 @@ pub mod error {
 }
 
 pub struct Suitware<'a> {
-    systems: Vec<&'a dyn System>,
+    systems: Vec<Box<dyn System>>,
     tasks: TaskPool<'a>,
+    plugins: Vec<Box<dyn Plugin>>,
 }
 
 impl<'a> Suitware<'a> {
-    /// Create a new app.
+    /// Create a new, blank app.
     pub fn new() -> Self {
         Suitware {
             systems: vec![],
             tasks: TaskPool {
                 tasks: HashMap::new(),
             },
+	    plugins: vec![],
         }
     }
 
-    /// Bind to a network
-    pub fn bind(self, _address: &str) -> Self {
-        // TODO: Actually bind
-        self
-    }
-
-    /// Add a system to the actor
-    pub fn add_system(mut self, system: &'a dyn System) -> Self {
+    /// Add a system.
+    /// ```rust
+    /// # use suitware::*;
+    /// struct BlankSystem {};
+    /// #[async_trait::async_trait]
+    /// impl System for BlankSystem { async fn run(&mut self) -> Result<NextState, &dyn std::error::Error> { Ok(NextState::Continue) } }
+    /// let app = Suitware::new().add_system(Box::new(BlankSystem {}));
+    /// ```
+    pub fn add_system(mut self, system: Box<dyn System>) -> Self {
         self.systems.push(system);
 
         self
@@ -44,16 +46,26 @@ impl<'a> Suitware<'a> {
         self
     }
 
-    pub async fn start(self) -> Result<(), SuitwareError> {
-        let config: Config = confy::load_path("protocol/mqttd.conf").unwrap();
-        let mut broker = Broker::new(config);
+    pub fn add_plugin(mut self, plugin: Box<dyn Plugin>) -> Self {
+	self.plugins.push(plugin);
+	self
+    }
 
-        thread::spawn(move || {
-            broker.start().unwrap();
-        });
-
-        for system in self.systems {
-            system.run().await.unwrap();
+    pub async fn start(mut self) -> Result<(), SuitwareError> {
+	for plugin in &mut self.plugins {
+	    plugin.init();
+	}
+	
+        for system in &mut self.systems {
+	    system.init();
+	    loop {
+		let res = system.run().await.unwrap();
+		match res {
+		    NextState::Continue => (),
+		    NextState::Stop => break,
+		}
+	    }
+	    system.end();
         }
 
         Ok(())
@@ -62,7 +74,14 @@ impl<'a> Suitware<'a> {
 
 #[async_trait::async_trait]
 pub trait System {
-    async fn run(&self) -> Result<(), &dyn std::error::Error>;
+    fn init(&self) {}
+    async fn run(&mut self) -> Result<NextState, &dyn std::error::Error>;
+    fn end(&self) {}
+}
+
+pub enum NextState {
+    Continue,
+    Stop,
 }
 
 struct TaskPool<'a> {
@@ -71,6 +90,10 @@ struct TaskPool<'a> {
 
 pub trait Task {
     fn run(&self);
+}
+
+pub trait Plugin {
+    fn init(&self);
 }
 
 #[cfg(test)]
