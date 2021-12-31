@@ -63,7 +63,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn render_temperature_plot(previous_temperatures: ModelHandle<f32>, _new_temperature: f32) -> Image {
+fn render_temperature_plot(
+    previous_temperatures: ModelHandle<f32>,
+    _new_temperature: f32,
+) -> Image {
     let mut buffer = SharedPixelBuffer::new(640, 480);
     let size = (buffer.width() as u32, buffer.height() as u32);
 

@@ -1,10 +1,13 @@
 use std::{collections::HashMap, time::Duration};
 
+pub mod plugins;
+
 use error::SuitwareError;
 
 pub mod error {
     use thiserror::Error;
 
+    /// A standard, catch-all Suitware error.
     #[derive(Error, Debug)]
     pub enum SuitwareError {}
 }
@@ -23,16 +26,20 @@ impl<'a> Suitware<'a> {
             tasks: TaskPool {
                 tasks: HashMap::new(),
             },
-	    plugins: vec![],
+            plugins: vec![],
         }
     }
 
     /// Add a system.
     /// ```rust
     /// # use suitware::*;
-    /// struct BlankSystem {};
-    /// #[async_trait::async_trait]
-    /// impl System for BlankSystem { async fn run(&mut self) -> Result<NextState, &dyn std::error::Error> { Ok(NextState::Continue) } }
+    /// # struct BlankSystem {};
+    /// # #[async_trait::async_trait]
+    /// # impl System for BlankSystem {
+    /// #   async fn run(&mut self) -> Result<NextState, &dyn std::error::Error> {
+    /// #     Ok(NextState::Stop)
+    /// #   }
+    /// # }
     /// let app = Suitware::new().add_system(Box::new(BlankSystem {}));
     /// ```
     pub fn add_system(mut self, system: Box<dyn System>) -> Self {
@@ -41,31 +48,34 @@ impl<'a> Suitware<'a> {
         self
     }
 
+    /// Add a recurring task.
     pub fn add_task(mut self, task: &'a dyn Task, duration: Duration) -> Self {
         self.tasks.tasks.insert(duration, task);
         self
     }
 
-    pub fn add_plugin(mut self, plugin: Box<dyn Plugin>) -> Self {
-	self.plugins.push(plugin);
-	self
+    /// Register a plugin.
+    pub fn register_plugin(mut self, plugin: Box<dyn Plugin>) -> Self {
+        self.plugins.push(plugin);
+        self
     }
 
+    /// Start the application.
     pub async fn start(mut self) -> Result<(), SuitwareError> {
-	for plugin in &mut self.plugins {
-	    plugin.init();
-	}
-	
+        for plugin in &mut self.plugins {
+            plugin.init();
+        }
+
         for system in &mut self.systems {
-	    system.init();
-	    loop {
-		let res = system.run().await.unwrap();
-		match res {
-		    NextState::Continue => (),
-		    NextState::Stop => break,
-		}
-	    }
-	    system.end();
+            system.init();
+            loop {
+                let res = system.run().await.unwrap();
+                match res {
+                    NextState::Continue => (),
+                    NextState::Stop => break,
+                }
+            }
+            system.end();
         }
 
         Ok(())

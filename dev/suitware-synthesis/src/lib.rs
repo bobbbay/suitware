@@ -5,7 +5,7 @@ pub trait Synthesis {
 }
 
 pub mod vehicle {
-    use fon::{Audio, mono::Mono64};
+    use fon::{mono::Mono64, Audio};
 
     use super::Synthesis;
 
@@ -70,21 +70,21 @@ pub mod vehicle {
 
 #[cfg(test)]
 mod tests {
-    use color_eyre::Result;
-    use super::*;
     use super::vehicle::*;
+    use super::*;
+    use color_eyre::Result;
 
     /// Setup test environment
     pub(crate) fn setup_tests() -> Result<()> {
         color_eyre::install()?;
         tracing_subscriber::fmt::init();
 
-	Ok(())
+        Ok(())
     }
-    
+
     #[test]
     fn synthesize_vehicle() -> Result<()> {
-	setup_tests()?;
+        setup_tests()?;
 
         let vehicle = Vehicle {};
         let _audio = vehicle.synthesize(Params {
