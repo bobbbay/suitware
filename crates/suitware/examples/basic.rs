@@ -1,9 +1,11 @@
 use color_eyre::Result;
+use rand::Rng;
+use rand::SeedableRng;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use tokio::time::Duration;
+use tracing::info;
 
 use suitware::{Suitware, System, Task};
-use tracing::info;
 
 struct TemperatureSensor;
 
@@ -15,8 +17,12 @@ impl System for TemperatureSensor {
         let (client, mut eventloop) = AsyncClient::new(mqttoptions, 100);
 
         tokio::spawn(async move {
-            for i in 1..=i32::MAX {
-                let serialized = bincode::serialize(&i).unwrap();
+            // Prepare a deterministic RNG
+            let mut rng = rand_pcg::Pcg32::seed_from_u64(13);
+
+            loop {
+                let random_value: f32 = rng.gen::<f32>() * 20.0;
+                let serialized = bincode::serialize(&random_value).unwrap();
 
                 client
                     .publish("temperature_sensor/get", QoS::AtMostOnce, false, serialized)

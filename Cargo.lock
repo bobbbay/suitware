@@ -2583,6 +2583,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rand_pcg"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59cad018caf63deb318e5a4586d99a24424a364f40f1e5778c29aca23f4fc73e"
+dependencies = [
+ "rand_core",
+]
+
+[[package]]
 name = "raw-window-handle"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3400,6 +3409,8 @@ dependencies = [
  "color-eyre",
  "confy",
  "mqttbytes 0.4.0",
+ "rand",
+ "rand_pcg",
  "rumqttc",
  "rumqttd",
  "thiserror",

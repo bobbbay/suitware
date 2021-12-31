@@ -6,60 +6,46 @@ Main := Window {
     preferred-width: 1000px;
     preferred-height: 700px;
 
-    // Callbacks
+    // Callbacks. These are used to communicate external state change to Rust
+    // code.
     callback render_temperature_sensor([float], float) -> image;
 
-    // Properties
-    property<[float]> previous_temperatures: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
-    property<int> temperature;
+    // Properties. A sort of "internal state" that we use as a mean of
+    // communication regarding app (and therefore spacesuit) state.
+    property<[float]> previous_temperatures: [];
+    property<float> temperature;
     property<[string]> logs;
 
+    // The main layout starts here.
     GridLayout {
         spacing: 20px;
 	Row {
             Image {
 	    	source: root.render_temperature_sensor(root.previous_temperatures, root.temperature);
+		width: 15%;
             }
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
+
+            Image {
+	    	source: root.render_temperature_sensor(root.previous_temperatures, root.temperature);
+		width: 15%;
             }
+
 	    Rectangle { background: blue; rowspan: 2; colspan: 2; }
 	}
 	Row {
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
+            Rectangle { border-width: 2px; border-color: black; }
+            Rectangle { border-width: 2px; border-color: black; }
 	}
 	Row {
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-		colspan: 2;
-            }
+            Rectangle { border-width: 2px; border-color: black; }
+            Rectangle { border-width: 2px; border-color: black; }
+
+            Rectangle { border-width: 2px; border-color: black; colspan: 2; }
 	}
 	Row {
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
+            Rectangle { border-width: 2px; border-color: black; }
+            Rectangle { border-width: 2px; border-color: black; }
+
 	    ScrollView {
 	        colspan: 2;
 	        rowspan: 2;
@@ -73,14 +59,8 @@ Main := Window {
 	    }
         }
 	Row {
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
-            Text {
-                text: "Temperature: \{temperature}";
-                color: green;
-            }
+            Rectangle { border-width: 2px; border-color: black; }
+            Rectangle { border-width: 2px; border-color: black; }
 	}
     }
 }
