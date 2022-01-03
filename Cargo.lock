@@ -60,6 +60,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "aparan"
+version = "0.1.0"
+dependencies = [
+ "aparan-macros",
+ "async-trait",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
+name = "aparan-macros"
+version = "0.1.0"
+dependencies = [
+ "aparan",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "argh"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"

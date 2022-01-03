@@ -1,0 +1,20 @@
+[package]
+name = "aparan"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = [ "full" ]
+
+full = [ "macros" ]
+
+macros = [ "aparan-macros" ]
+
+[dependencies]
+aparan-macros = { path = "../aparan-macros", optional = true } # Macros
+
+tokio = { version = "1.0", features = [ "macros", "rt-multi-thread" ] } # Asynchronous runtime
+
+async-trait = "0.1.52" # async fns in traits
+
+thiserror = "1.0" # derive(Error)
