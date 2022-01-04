@@ -1,6 +1,6 @@
 //! Uses the #[worker] attribute to create a worker.
 
-use aparan::prelude::{Context, Worker, Result};
+use aparan::prelude::{Context, Result, Worker};
 
 struct MyMiscWorker;
 
@@ -8,8 +8,8 @@ struct MyMiscWorker;
 impl Worker for MyMiscWorker {
     type Message = ();
 
-    async fn start(&mut self, _: &Context) -> Result<()> {
-	Ok(())
+    async fn start(mut self, _: Context) -> Result<()> {
+        Ok(())
     }
 }
 

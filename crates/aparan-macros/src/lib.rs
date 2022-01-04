@@ -44,10 +44,10 @@ mod worker {
     use syn::ItemImpl;
 
     pub(crate) fn into_async_trait(input: ItemImpl) -> TokenStream {
-	let header = quote!( #[aparan::async_trait::async_trait] );
+        let header = quote!( #[aparan::async_trait::async_trait] );
 
         let result = quote!(
-	    #header
+        #header
             #input
         );
 
