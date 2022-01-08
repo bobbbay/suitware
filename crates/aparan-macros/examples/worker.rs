@@ -8,7 +8,7 @@ struct MyMiscWorker;
 impl Worker for MyMiscWorker {
     type Message = ();
 
-    async fn start(mut self, _: Context) -> Result<()> {
+    async fn start(mut self, _: &Context) -> Result<()> {
         Ok(())
     }
 }

@@ -46,19 +46,12 @@ pub mod error {
 pub mod context {
     //! Application contexts.
 
-    use std::sync::Arc;
-
     use async_channel::{Receiver, Recv, Sender};
     use backoff::{future::retry, ExponentialBackoff};
     use futures::future::select_all;
     use halfbrown::HashMap;
 
-    use crate::{
-        error::Error,
-        error::Result,
-        message::{Message, Sendable},
-        worker::Worker,
-    };
+    use crate::{error::Error, error::Result, message::Message, worker::Worker};
 
     #[derive(Clone)]
     /// An Aparan context, containing information about the worker.
@@ -79,16 +72,8 @@ pub mod context {
         }
 
         /// Start a worker.
-        pub async fn start<W>(&self, worker: W) -> Result<()>
-        where
-            W: Worker + 'static,
-        {
-            let local_context = self.clone();
-            tokio::spawn(async move {
-                // worker.start(local_context).await;
-            });
-
-            Ok(())
+        pub async fn start(&self, worker: impl Worker) -> Result<()> {
+            worker.start(self).await
         }
 
         /// Adds a new channel.
@@ -157,10 +142,10 @@ pub mod worker {
 
     /// A generic enum for workers. Can either by a sender or a receiver.
     #[async_trait::async_trait]
-    pub trait Worker: Send {
+    pub trait Worker {
         type Message;
 
-        async fn start(mut self, ctx: Context) -> Result<()>;
+        async fn start(mut self, ctx: &Context) -> Result<()>;
     }
 }
 
@@ -176,9 +161,14 @@ pub mod message {
         pub fn new(body: &'a dyn Sendable) -> Self {
             Self { body }
         }
+
+        pub fn get_body(&self) -> &'a dyn Sendable {
+            self.body
+        }
     }
 
     pub trait Sendable: Debug + Send + Sync {}
 
     impl Sendable for String {}
+    impl Sendable for i32 {}
 }

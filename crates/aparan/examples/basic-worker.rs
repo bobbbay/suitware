@@ -7,10 +7,17 @@ use aparan::tokio::time::{sleep, Duration};
 #[aparan::node]
 // async fn main(mut ctx: Context) -> Result<()> {
 async fn main() -> Result<()> {
-    let ctx = std::sync::Arc::new(tokio::sync::Mutex::new(Context::new()));
+    let mut ctx = Context::new();
 
-    ctx.lock().await.start(MyReceiver).await?;
-    ctx.lock().await.start(MySender).await?;
+    ctx.new_channel("topic").await;
+
+    let message = Message::new(&100_i32);
+    ctx.send("topic", message).await?;
+
+    ctx.subscribe("topic")?;
+
+    ctx.start(MyReceiver).await?;
+    ctx.start(MySender).await?;
 
     loop {}
 }
@@ -19,15 +26,19 @@ async fn main() -> Result<()> {
 /// Note that we can keep state inside workers.
 struct MySender;
 
+// TODO this worker actually does nothing now. This is because we cannot
+// distribute a shared mutable reference to multiple workers. We need to
+// use some sort of locking mechanism (maybe implicit?).
+
 #[aparan::worker]
 impl Worker for MySender {
     type Message = String;
 
-    async fn start(mut self, ctx: Context) -> Result<()> {
-        let message = Message::new(&"message".to_string());
+    async fn start(mut self, _: &Context) -> Result<()> {
+        let _message = Message::new(&"message".to_string());
 
         loop {
-            ctx.send("topic", message).await?;
+            // ctx.send("topic", message).await?;
             dbg!("");
             sleep(Duration::from_secs(1)).await;
         }
@@ -41,8 +52,8 @@ struct MyReceiver;
 impl Worker for MyReceiver {
     type Message = String;
 
-    async fn start(mut self, mut ctx: Context) -> Result<()> {
-        ctx.subscribe("topic")?;
+    async fn start(mut self, ctx: &Context) -> Result<()> {
+        // ctx.subscribe("topic")?;
 
         loop {
             // `ctx.receive()` will only return when it receives a message.
