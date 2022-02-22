@@ -1,0 +1,28 @@
+[package]
+name = "aparan"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = [ "full" ]
+
+full = [ "macros" ]
+
+macros = [ "aparan-macros" ]
+
+[dependencies]
+# Aparan
+aparan-macros = { path = "../aparan-macros", optional = true } # Macros
+
+# Asynchronous
+futures = "0.3.19" # Async prelude
+tokio = { version = "1.0", features = [ "macros", "rt-multi-thread", "time" ] } # Asynchronous runtime
+async-channel = "1.6.1" # Asynchronous MPMC channels
+
+# Helpers
+async-trait = "0.1.52" # async fns in traits
+async-recursion = "0.3.2" # recursion in async fns
+backoff = { version = "0.4.0", features = [ "tokio" ] } # Retry policies
+halfbrown = "0.1.12" # Faster hashmaps
+thiserror = "1.0" # derive(Error)
+anyhow = "1.0.52" # Generic errors
